@@ -1,5 +1,3 @@
-version: '3'
-
 services:
   audio-diarizer:
     build: .
@@ -8,8 +6,11 @@ services:
     volumes:
       - ./uploads:/app/uploads
       - ./results:/app/results
+      - ./app/templates:/app/app/templates
+      - ./app/static:/app/app/static
     environment:
+      - PYTHONPATH=/app
+      - TEMPLATES_DIR=/app/app/templates
+      - STATIC_DIR=/app/app/static
       - DIARIZER_TYPE=lightweight
-      # Uncomment to use the full Whisper model
-      # - DIARIZER_TYPE=whisper
     restart: unless-stopped

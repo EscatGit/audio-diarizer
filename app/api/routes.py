@@ -7,7 +7,8 @@ import json
 from datetime import datetime
 from typing import Dict, List, Any, Optional
 
-from ..core import create_diarizer
+# Cambiar importación relativa a absoluta
+from app.core import create_diarizer
 
 router = APIRouter()
 

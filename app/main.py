@@ -6,33 +6,95 @@ from fastapi import Request
 import os
 import uvicorn
 
-from .api.routes import router as api_router
+# Cambiar importación relativa a absoluta
+from app.api.routes import router as api_router
+
+# Obtener rutas de directorios de variables de entorno o usar valores predeterminados
+templates_dir = os.environ.get('TEMPLATES_DIR', 'app/templates')
+static_dir = os.environ.get('STATIC_DIR', 'app/static')
+
+# Imprimir información de depuración
+print(f"🔍 Usando directorio de plantillas: {templates_dir}")
+print(f"🔍 Usando directorio estático: {static_dir}")
+print(f"🔍 Directorio actual: {os.getcwd()}")
+print(f"🔍 Contenido del directorio de plantillas:")
+try:
+    if os.path.exists(templates_dir):
+        print(f"   ✅ {templates_dir} existe")
+        print(f"   Contenido: {os.listdir(templates_dir)}")
+    else:
+        print(f"   ❌ {templates_dir} no existe")
+except Exception as e:
+    print(f"   Error: {e}")
 
 # Create FastAPI app
 app = FastAPI(
     title="Audio Diarizer",
-    description="API for audio diarization",
+    description="API para diarización de audio",
     version="0.1.0"
 )
 
+# Asegurar que los directorios existan
+os.makedirs(static_dir, exist_ok=True)
+os.makedirs(os.path.join(static_dir, "css"), exist_ok=True)
+os.makedirs(os.path.join(static_dir, "js"), exist_ok=True)
+os.makedirs(templates_dir, exist_ok=True)
+
 # Mount static files
-app.mount("/static", StaticFiles(directory="app/static"), name="static")
+try:
+    app.mount("/static", StaticFiles(directory=static_dir), name="static")
+    print("✅ Archivos estáticos montados correctamente")
+except Exception as e:
+    print(f"❌ Error al montar archivos estáticos: {e}")
 
 # Setup templates
-templates = Jinja2Templates(directory="app/templates")
+templates = Jinja2Templates(directory=templates_dir)
 
 # Include API routes
 app.include_router(api_router, prefix="/api")
 
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
-    """Serve the index page"""
-    return templates.TemplateResponse("index.html", {"request": request})
+    """Página de inicio"""
+    # Verificar si existe el template antes de intentar renderizarlo
+    template_path = os.path.join(templates_dir, "index.html")
+    if os.path.exists(template_path):
+        print(f"✅ Usando template: {template_path}")
+        return templates.TemplateResponse("index.html", {"request": request})
+    else:
+        print(f"❌ No se encontró el template: {template_path}")
+        # Template básico de respaldo
+        return HTMLResponse(content="""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Audio Diarizer</title>
+            <style>
+                body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+                h1 { color: #3498db; }
+                .card { border: 1px solid #e1e5ea; border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+            </style>
+        </head>
+        <body>
+            <h1>Audio Diarizer</h1>
+            <div class="card">
+                <p>El sistema está funcionando pero no se encontró la plantilla completa.</p>
+                <p>Puedes subir archivos a través de la API: <code>/api/upload</code></p>
+            </div>
+        </body>
+        </html>
+        """)
 
 @app.get("/health")
 async def health_check():
-    """Health check endpoint"""
-    return {"status": "healthy", "version": app.version}
+    """Verificación de estado"""
+    return {
+        "status": "healthy", 
+        "version": app.version,
+        "templates_dir": templates_dir,
+        "templates_exists": os.path.exists(templates_dir),
+        "index_exists": os.path.exists(os.path.join(templates_dir, "index.html")) if os.path.exists(templates_dir) else False
+    }
 
 if __name__ == "__main__":
     # Run the application when executed directly
