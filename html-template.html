@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audio Diarizer</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Audio Diarizer</h1>
+            <p class="subtitle">Identifica quién habla y cuándo en archivos de audio</p>
+        </header>
+        
+        <div class="card">
+            <div class="upload-section">
+                <h2>Sube un archivo de audio</h2>
+                <form id="upload-form">
+                    <div class="file-input-container">
+                        <label for="audio-file" class="file-label">
+                            <span class="file-icon">📁</span>
+                            <span id="file-name">Seleccionar archivo...</span>
+                        </label>
+                        <input type="file" id="audio-file" name="file" accept="audio/*" required>
+                    </div>
+                    
+                    <div class="options">
+                        <div class="option-group">
+                            <label for="num-speakers">Número de hablantes:</label>
+                            <select id="num-speakers" name="num_speakers">
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                            </select>
+                        </div>
+                        
+                        <div class="option-group">
+                            <label for="diarizer-type">Tipo de diarización:</label>
+                            <select id="diarizer-type" name="diarizer_type">
+                                <option value="lightweight">Ligera (rápida)</option>
+                                <option value="whisper">Whisper (completa)</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="submit-button">Procesar</button>
+                </form>
+            </div>
+            
+            <div id="processing" class="hidden processing-section">
+                <div class="loader"></div>
+                <p>Procesando tu archivo de audio...</p>
+                <p class="note">Esto puede tomar unos minutos dependiendo del tamaño del archivo.</p>
+            </div>
+            
+            <div id="results" class="hidden result-section">
+                <h2>Resultados</h2>
+                <div class="transcript-container">
+                    <div id="transcript" class="transcript"></div>
+                </div>
+                <div class="download-section">
+                    <button id="download-btn" class="download-button">Descargar transcripción</button>
+                </div>
+            </div>
+            
+            <div id="error" class="hidden error-section">
+                <div class="error-icon">❌</div>
+                <h2>Error en el procesamiento</h2>
+                <p id="error-message"></p>
+                <button id="try-again-btn" class="try-again-button">Intentar de nuevo</button>
+            </div>
+        </div>
+        
+        <footer>
+            <p>Audio Diarizer © 2023 - <a href="https://github.com/yourusername/audio-diarizer" target="_blank">GitHub</a></p>
+        </footer>
+    </div>
+    
+    <script src="/static/js/main.js"></script>
+</body>
+</html>
