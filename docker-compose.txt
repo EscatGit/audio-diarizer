@@ -1,0 +1,15 @@
+version: '3'
+
+services:
+  audio-diarizer:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./uploads:/app/uploads
+      - ./results:/app/results
+    environment:
+      - DIARIZER_TYPE=lightweight
+      # Uncomment to use the full Whisper model
+      # - DIARIZER_TYPE=whisper
+    restart: unless-stopped
