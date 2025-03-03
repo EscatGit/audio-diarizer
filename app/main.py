@@ -3,6 +3,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
 from fastapi import Request
+from fastapi.middleware.cors import CORSMiddleware
 import os
 import uvicorn
 
@@ -33,6 +34,18 @@ app = FastAPI(
     description="API para diarización de audio",
     version="0.1.0"
 )
+
+# Configurar CORS para permitir solicitudes desde la aplicación Electron
+# Verificar si CORS está habilitado desde variables de entorno
+if os.environ.get('ALLOW_CORS', 'false').lower() in ('true', '1', 't'):
+    print("✅ CORS habilitado para todos los orígenes")
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],  # Permitir todos los orígenes
+        allow_credentials=True,
+        allow_methods=["*"],  # Permitir todos los métodos
+        allow_headers=["*"],  # Permitir todos los encabezados
+    )
 
 # Asegurar que los directorios existan
 os.makedirs(static_dir, exist_ok=True)
@@ -93,10 +106,12 @@ async def health_check():
         "version": app.version,
         "templates_dir": templates_dir,
         "templates_exists": os.path.exists(templates_dir),
-        "index_exists": os.path.exists(os.path.join(templates_dir, "index.html")) if os.path.exists(templates_dir) else False
+        "index_exists": os.path.exists(os.path.join(templates_dir, "index.html")) if os.path.exists(templates_dir) else False,
+        "cors_enabled": os.environ.get('ALLOW_CORS', 'false').lower() in ('true', '1', 't')
     }
 
 if __name__ == "__main__":
     # Run the application when executed directly
     port = int(os.environ.get("PORT", 8000))
-    uvicorn.run("app.main:app", host="0.0.0.0", port=port, reload=True)
+    host = os.environ.get("HOST", "0.0.0.0")
+    uvicorn.run("app.main:app", host=host, port=port, reload=True)

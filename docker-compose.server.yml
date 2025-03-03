@@ -1,0 +1,28 @@
+
+services:
+  audio-diarizer-server:
+    build: .
+    container_name: audio-diarizer-server
+    ports:
+      - "8000:8000"  # Expone el puerto 8000 para conexiones remotas
+    volumes:
+      - ./uploads:/app/uploads
+      - ./results:/app/results
+      - ./app/templates:/app/app/templates
+      - ./app/static:/app/app/static
+    environment:
+      - PYTHONPATH=/app
+      - TEMPLATES_DIR=/app/app/templates
+      - STATIC_DIR=/app/app/static
+      - DIARIZER_TYPE=lightweight
+      # Para cambiar a la versión completa, comenta la línea anterior y descomenta la siguiente
+      # - DIARIZER_TYPE=whisper
+      # Permitir conexiones desde cualquier origen (CORS)
+      - ALLOW_CORS=true
+    restart: unless-stopped
+    networks:
+      - diarizer-network
+
+networks:
+  diarizer-network:
+    driver: bridge
